@@ -1,4 +1,4 @@
-# led-treasure-spa
+# treasure-spa
 
 ## Project setup
 ```
