@@ -23,35 +23,65 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
+      <v-btn v-on:click="sendMessage(message)">Click here</v-btn>
+      <v-btn v-on:click="getStatusBuzzer(getBuzzerJSON)">BuzzerStatus</v-btn>
     </v-app-bar>
 
     <v-main>
-      <HelloWorld />
+      <v-card>Message: {{ this.message }}</v-card>
+      <v-card>Buzzer: {{ statusBuzzer }}</v-card>
     </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import HelloWorld from "./components/HelloWorld.vue";
 
 export default Vue.extend({
   name: "App",
 
-  components: {
-    HelloWorld
-  },
+  components: {},
+  methods: {
+    sendMessage: function(message: string) {
+      //console.log(JSON.stringify(message))
+      console.log(this.connection);
+      if (message != null) {
+        this.connection.send(JSON.stringify(this.message));
+      }
+    },
+    getStatusBuzzer: function(getBuzzerJSON) {
+      this.statusBuzzer = this.connection.send(JSON.stringify(this.getBuzzerJSON))
 
-  data: () => ({
-    //
-  })
+    }
+  },
+  data: function() {
+    return {
+      connection: null,
+      message: {
+        // eslint-disable-next-line prettier/prettier
+        "setVars": {
+        // eslint-disable-next-line prettier/prettier
+        "isBuzzerHit": true
+        }
+      },
+      getBuzzerJSON: { "getVars": true},
+      statusBuzzer: {}
+    };
+  },
+  created: function() {
+    console.log("Starting WebSocket Connection.");
+    this.connection = new WebSocket("ws://192.168.137.62:81");
+
+    this.connection.onopen = function(event) {
+      console.log(event);
+      console.log("Successfull connected.");
+    };
+
+    this.connection.onmessage = function(event) {
+      console.log(event);
+      this.statusBuzzer = JSON.parse(event.data)
+    };
+  }
+  //
 });
 </script>
