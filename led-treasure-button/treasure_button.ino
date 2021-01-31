@@ -1,97 +1,114 @@
-/**
-   BasicHTTPClient.ino
+/*
+ * WebSocketClient.ino
+ *
+ *  Created on: 24.05.2015
+ *
+ */
 
-    Created on: 24.05.2015
+#include <Arduino.h>
 
-*/
 #include <ESP8266WiFi.h>
-#include <WebSocketClient.h>
+#include <ESP8266WiFiMulti.h>
+#include <ArduinoJson.h>
+#include <WebSocketsClient.h>
 
-#define activate_Pin D6
+#include <Hash.h>
 
-const char* ssid     = "FiWi-Desktop";
-const char* password = "e8749Q)6";
-char path[] = "/";
-char host[] = "192.168.137.62";
-string output  
-WebSocketClient webSocketsClient;
+ESP8266WiFiMulti WiFiMulti;
+WebSocketsClient webSocket;
+String output;
 
-// Use WiFiClient class to create TCP connections
-WiFiClient client;
+#define USE_SERIAL Serial
 
-void setup() {
-  pinMode(activate_Pin,INPUT_PULLUP);
-  Serial.begin(115200);
-  delay(10);
-StaticJsonDocument<32> doc;
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 
-doc["setVars"]["isBuzzerHit"] = true;
+	switch(type) {
+		case WStype_DISCONNECTED:
+			USE_SERIAL.printf("[WSc] Disconnected!\n");
+			break;
+		case WStype_CONNECTED: {
+			USE_SERIAL.printf("[WSc] Connected to url: %s\n", payload);
 
-serializeJson(doc, output);
-  // We start by connecting to a WiFi network
+			// send message to server when Connected
+			webSocket.sendTXT("Connected");
+		}
+			break;
+		case WStype_TEXT:
+			USE_SERIAL.printf("[WSc] get text: %s\n", payload);
 
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  
-  WiFi.begin(ssid, password);
-  
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+			// send message to server
 
-  Serial.println("");
-  Serial.println("WiFi connected");  
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
 
-  delay(5000);
-  
+			break;
+		case WStype_BIN:
+			USE_SERIAL.printf("[WSc] get binary length: %u\n", length);
+			hexdump(payload, length);
 
-  // Connect to the websocket server
-  if (client.connect(host, 81)) {
-    Serial.println("Connected");
-  } else {
-    Serial.println("Connection failed.");
-    while(1) {
-      // Hang on failure
+			// send data to server
+			// webSocket.sendBIN(payload, length);
+			break;
+        case WStype_PING:
+            // pong will be send automatically
+            USE_SERIAL.printf("[WSc] get ping\n");
+            break;
+        case WStype_PONG:
+            // answer to a ping we send
+            USE_SERIAL.printf("[WSc] get pong\n");
+            break;
     }
-  }
-
-  // Handshake with the server
-  webSocketsClient.path = path;
-  webSocketsClient.host = host;
-  if (webSocketsClient.handshake(client)) {
-    Serial.println("Handshake successful");
-  } else {
-    Serial.println("Handshake failed.");
-    while(1) {
-      // Hang on failure
-    }  
-  }
 
 }
 
+void setup() {
+			StaticJsonDocument<32> doc;
+		doc["setVars"]["isBuzzerHit"] = true;
+
+		serializeJson(doc, output);
+	// USE_SERIAL.begin(921600);
+	USE_SERIAL.begin(115200);
+
+	//Serial.setDebugOutput(true);
+	USE_SERIAL.setDebugOutput(true);
+  pinMode(D6,INPUT_PULLUP);
+	USE_SERIAL.println();
+	USE_SERIAL.println();
+	USE_SERIAL.println();
+
+	for(uint8_t t = 4; t > 0; t--) {
+		USE_SERIAL.printf("[SETUP] BOOT WAIT %d...\n", t);
+		USE_SERIAL.flush();
+		delay(1000);
+	}
+
+	WiFiMulti.addAP("FiWi-Desktop", "e8749Q)6");
+
+	//WiFi.disconnect();
+	while(WiFiMulti.run() != WL_CONNECTED) {
+		delay(100);
+	}
+
+	// server address, port and URL
+	webSocket.begin("192.168.137.62", 81, "/");
+
+	// event handler
+	//webSocket.onEvent(webSocketEvent);
+
+	// use HTTP Basic Authorization this is optional remove if not needed
+	
+	// try ever 5000 again if connection has failed
+	webSocket.setReconnectInterval(5000);
+  
+  // start heartbeat (optional)
+  // ping server every 15000 ms
+  // expect pong from server within 3000 ms
+  // consider connection disconnected if pong is not received 2 times
+  //webSocket.enableHeartbeat(15000, 3000, 2);
+
+}
 
 void loop() {
-  String data;
-
-  if (client.connected()) {
-    
-       // capture the value of analog 1, send it along
-    if (digitalRead(activate_Pin)) {
-    webSocketsClient.sendData(output);
-    }
-  } else {
-    Serial.println("Client disconnected.");
-    while (1) {
-      // Hang on disconnect.
-    }
-  }
-  
-  // wait to fully let the client disconnect
-  delay(3000);
-  
+	webSocket.loop();
+	      if(digitalRead(D6) == LOW ) {
+			 webSocket.sendTXT(output);
+			 delay(1000);}
 }
