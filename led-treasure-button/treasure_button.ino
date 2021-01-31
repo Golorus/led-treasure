@@ -93,7 +93,7 @@ void setup() {
 	webSocket.begin(IP_LED,PORT_LED, "/");
 
 	// event handler
-	//webSocket.onEvent(webSocketEvent);
+	webSocket.onEvent(webSocketEvent);
 
 	// use HTTP Basic Authorization this is optional remove if not needed
 	
@@ -112,5 +112,5 @@ void loop() {
 	webSocket.loop();
 	      if(digitalRead(D6) == LOW ) {
 			 webSocket.sendTXT(output);
-			 delay(500);}
+			 delay(200);}
 }

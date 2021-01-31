@@ -1,19 +1,20 @@
 ﻿export var isBuzzerHit = false
 export var treasurePlace = 0
 export var buzzerPosition =0
-export var difference = 100 
-export var additionalLEDs
+ var difference = 100 
+ var additionalLEDs
 var treasureColor = 0.3
 export var buzzerV = 0
-export var duration = 0.5      
-export var leaderCount
+var duration = 0.5      
+export var leaderCount = 0
 export var leader = 0
 direction = 1
 pixels = array(pixelCount)
 treasurePlace = ceil(random(pixelCount-2))+1
-  speed = 0.2 
+  speed = 0.2
   
 function newGame() {
+    ignoreInputs=false
             leader = 2
   buzzerPostition = 0
         leaderCount = 0
@@ -25,10 +26,13 @@ function newGame() {
 
 export function beforeRender(delta) {
   if (buzzerPosition == treasurePlace) {
-    if (leader > 49.9 && leader < 50.1) {
+    ignoreInputs = true
+    speed = 0.5
+    if (leader > 49.4 && leader < 50) {
       leaderCount = leaderCount +1
       if (leaderCount >=2) {
-
+        pixels[buzzerPosition] = 0 
+        
         newGame();
       }
     }
@@ -41,13 +45,16 @@ export function beforeRender(delta) {
   if (leader <=0) {
     direction = -direction
   }
-  if (isBuzzerHit) {
-    speed = speed +0.01
+  if (isBuzzerHit && !ignoreInputs) {
+    speed = speed +0.05
     if (speed >= 2) { speed = 0.2}
     buzzerV = 1
     buzzerPosition = floor(leader)
     difference = abs(buzzerPosition - treasurePlace)
-    additionalLEDs = floor((abs(buzzerPosition - treasurePlace)/(pixelCount/4.5)))
+    additionalLEDs = floor((abs(buzzerPosition - treasurePlace)/(pixelCount/9)))
+    if (additionalLEDs <1) {
+      if (speed - 0.1 >0.1) {speed = speed -0.1}
+    }
   //if(buzzerPosition == treasurePlace) {
   //  treasureColor = 0
   //  direction = 0
