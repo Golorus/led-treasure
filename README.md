@@ -1,6 +1,6 @@
 # LED Treasure Hunt
 
-*In LED Treasure Hunt you are searching for the long lost treasure of the pirates. *
+*In LED Treasure Hunt you are searching for the long lost treasure of the pirates.*
 
 But you have to be prepared with the following tools, to go on this journey:
 
