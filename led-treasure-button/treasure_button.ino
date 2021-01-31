@@ -19,8 +19,10 @@ WebSocketsClient webSocket;
 String output;
 
 #define USE_SERIAL Serial
-#define IP_LED "192.168.137.135"
-#define PORT_LED 81
+#define IP_LED "YOUR-LED-CONTROLLER-IP-HERE"
+#define PORT_LED "YOUR-LED-CONTROLLER-WEBSOCKET-PORT-HERE"
+#define ssid "YOUR-WLAN-ID"
+#define wlan-password "YOUR-WLAN-PW"
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 
@@ -82,7 +84,7 @@ void setup() {
 		delay(1000);
 	}
 
-	WiFiMulti.addAP("FiWi-Desktop", "e8749Q)6");
+	WiFiMulti.addAP(ssid, wlan-password);
 
 	//WiFi.disconnect();
 	while(WiFiMulti.run() != WL_CONNECTED) {
