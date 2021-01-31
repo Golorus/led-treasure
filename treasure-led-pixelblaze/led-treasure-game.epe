@@ -1,8 +1,104 @@
-﻿{
-  "name": "led-treasure-game",
-  "id": "T69nbwDWk3zq6k4F5",
-  "sources": {
-    "main": "export var isBuzzerHit = false\nexport var treasurePlace = 0\nexport var buzzerPosition =20 \nexport var difference = 100 \nexport var additionalLEDs\nvar treasureColor = 0.3\nexport var buzzerV = 0\nexport var duration = 0.5      \n\nexport var leader = 0\ndirection = 1\npixels = array(pixelCount)\ntreasurePlace = ceil(random(pixelCount-1))\n  speed = 0.2 \nfunction newGame() {\n  \n}\nexport function sliderbuzzer(b) {\n  isBuzzerHit = b\n}\n\nexport function beforeRender(delta) {\n  t1 =time(0.01)\n  leader = (leader + direction * speed)\n  if (leader >= pixelCount) {\n    direction = -direction\n  }\n  if (leader <=0) {\n    direction = -direction\n  }\n  if (isBuzzerHit) {\n    speed = speed +0.01\n    if (speed >= 2) { speed = 0.2}\n    buzzerV = 1\n    buzzerPosition = floor(leader)\n    difference = abs(buzzerPosition - treasurePlace)\n    additionalLEDs = ceil((abs(buzzerPosition - treasurePlace)/(pixelCount/4.5)))\n  //if(buzzerPosition == treasurePlace) {\n  //  treasureColor = 0\n  //  direction = 0\n  //}\n  isBuzzerHit = false\n}\nbuzzerV = buzzerV - (duration/difference)\n  for (i=0; i<pixelCount;i++) {\n    //if (i == treasurePlace) {\n      //pixels[i] =1    }else \n      if(i== buzzerPosition-additionalLEDs && buzzerV > 0) {\n      \n      if ((buzzerPosition -additionalLEDs)<0) {\n        k=0\n      }else {k=buzzerPosition}\n      if ((buzzerPosition + additionalLEDs)>pixelCount) {\n        max = pixelCount;\n      }else {max=buzzerPosition+additionalLEDs}\n      for (k;k<=max;k++) {\n      pixels[k] = buzzerV\n      i = i+additionalLEDs*2\n      }\n    }else if (i == floor(leader) ) {\n     \n      pixels[i] = 1\n}\n    else{\n    pixels[i] = 0\n    }\n      \n    }\n}\n\n\nexport function render(index) {\n\n  if(buzzerPosition == treasurePlace) {\n    h=0.3;\n    v=wave(t1)\n    hsv(h,1,v)\n    \n  }//else if (index == treasurePlace) {\n    //h = treasureColor\n    //v = pixels[index]  }\n    else if(index >= (buzzerPosition-additionalLEDs) && index <= (buzzerPosition+additionalLEDs) && buzzerV > 0) {\n    h = 1\n    v = pixels[index]\n  }  else{\n    h= 0.4\n    v = pixels[index]\n  }\n  \n  hsv(h,1,v)\n}"
-  },
-  "preview": "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"
+﻿export var isBuzzerHit = false
+export var treasurePlace = 0
+export var buzzerPosition =0
+export var difference = 100 
+export var additionalLEDs
+var treasureColor = 0.3
+export var buzzerV = 0
+export var duration = 0.5      
+export var leaderCount
+export var leader = 0
+direction = 1
+pixels = array(pixelCount)
+treasurePlace = ceil(random(pixelCount-2))+1
+  speed = 0.2 
+  
+function newGame() {
+            leader = 2
+  buzzerPostition = 0
+        leaderCount = 0
+        speed = 0.2
+  treasurePlace = ceil(random(pixelCount-2))+1
+  
+}
+
+
+export function beforeRender(delta) {
+  if (buzzerPosition == treasurePlace) {
+    if (leader > 49.9 && leader < 50.1) {
+      leaderCount = leaderCount +1
+      if (leaderCount >=2) {
+
+        newGame();
+      }
+    }
+  }
+  t1 =time(0.01)
+  leader = (leader + direction * speed)
+  if (leader >= pixelCount) {
+    direction = -direction
+  }
+  if (leader <=0) {
+    direction = -direction
+  }
+  if (isBuzzerHit) {
+    speed = speed +0.01
+    if (speed >= 2) { speed = 0.2}
+    buzzerV = 1
+    buzzerPosition = floor(leader)
+    difference = abs(buzzerPosition - treasurePlace)
+    additionalLEDs = floor((abs(buzzerPosition - treasurePlace)/(pixelCount/4.5)))
+  //if(buzzerPosition == treasurePlace) {
+  //  treasureColor = 0
+  //  direction = 0
+  //}
+  isBuzzerHit = false
+}
+buzzerV = buzzerV - (duration/difference)
+  for (i=0; i<pixelCount;i++) {
+    //if (i == treasurePlace) {
+      //pixels[i] =1    }else 
+      if(i== buzzerPosition-additionalLEDs && buzzerV > 0) {
+      
+      if ((buzzerPosition -additionalLEDs)<0) {
+        k=0
+      }else {k=buzzerPosition}
+      if ((buzzerPosition + additionalLEDs)>pixelCount) {
+        max = pixelCount;
+      }else {max=buzzerPosition+additionalLEDs}
+      for (k;k<=max;k++) {
+      pixels[k] = buzzerV
+      i = i+additionalLEDs*2
+      }
+    }else if (i == floor(leader) ) {
+     
+      pixels[i] = 1
+}
+    else{
+    pixels[i] = 0
+    }
+      
+    }
+}
+
+
+export function render(index) {
+
+  if(buzzerPosition == treasurePlace) {
+    h=0.3;
+    v=wave(t1)
+    hsv(h,1,v)
+    
+  }//else if (index == treasurePlace) {
+    //h = treasureColor
+    //v = pixels[index]  }
+    else if(index >= (buzzerPosition-additionalLEDs) && index <= (buzzerPosition+additionalLEDs) && buzzerV > 0) {
+    h = 1
+    v = pixels[index]
+  }  else{
+    h= 0.4
+    v = pixels[index]
+  }
+  
+  hsv(h,1,v)
 }

@@ -19,6 +19,8 @@ WebSocketsClient webSocket;
 String output;
 
 #define USE_SERIAL Serial
+#define IP_LED "192.168.137.135"
+#define PORT_LED 81
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 
@@ -88,7 +90,7 @@ void setup() {
 	}
 
 	// server address, port and URL
-	webSocket.begin("192.168.137.62", 81, "/");
+	webSocket.begin(IP_LED,PORT_LED, "/");
 
 	// event handler
 	//webSocket.onEvent(webSocketEvent);
@@ -110,5 +112,5 @@ void loop() {
 	webSocket.loop();
 	      if(digitalRead(D6) == LOW ) {
 			 webSocket.sendTXT(output);
-			 delay(1000);}
+			 delay(500);}
 }
