@@ -4,11 +4,15 @@
 
 But you have to be prepared with the following tools, to go on this journey:
 
+## Tools for the hunt
+
 - an ESP8266 controller
 - a mechanical input device, in my case an emergency stop button
 - a led controller for addressable leds. ideal with a direct web socket server like in my case, I used the PixelBlaze V2, designed and sold by Ben Hencke. [Ben Henckes Site](https://www.bhencke.com/pixelblaze)
 
 But be patient. After you picked up your tools, you will need a bit of study to start the hunt:
+
+## Configuration for the tools
 
 - first go to the file /treasure-led-button/ and insert your personal information of the controller and your wlan.
 
@@ -23,6 +27,8 @@ After that, transfer this file to your ESP8266 with your choice of IDE. For exam
 -second please import the pattern file from /tresure-led-pixelblaze/led-treasure-game.epe to your pixelblaze controller
 
 And now, after you configured all of your tools, you can start!
+
+## It´s playtime!
 
 after powering everything with any kind of power source, the game will start by starting the led, hunting for the treasure. With a hit on the button, you will search on the special spot for the treasure. 
 
