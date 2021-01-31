@@ -4,127 +4,94 @@
     Created on: 24.05.2015
 
 */
-
-#include <Arduino.h>
-
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
-#include <ArduinoJson.h>
-#include <ESP8266HTTPClient.h>
-#include <WiFiClient.h>
+#include <WebSocketClient.h>
 
-ESP8266WiFiMulti WiFiMulti;
+#define activate_Pin D6
+
+const char* ssid     = "FiWi-Desktop";
+const char* password = "e8749Q)6";
+char path[] = "/";
+char host[] = "192.168.137.62";
+string output  
+WebSocketClient webSocketsClient;
+
+// Use WiFiClient class to create TCP connections
+WiFiClient client;
 
 void setup() {
-  pinMode(D6, INPUT_PULLUP);
+  pinMode(activate_Pin,INPUT_PULLUP);
   Serial.begin(115200);
-  // Serial.setDebugOutput(true);
+  delay(10);
+StaticJsonDocument<32> doc;
+
+doc["setVars"]["isBuzzerHit"] = true;
+
+serializeJson(doc, output);
+  // We start by connecting to a WiFi network
 
   Serial.println();
   Serial.println();
-  Serial.println();
-
-  for (uint8_t t = 4; t > 0; t--) {
-    Serial.printf("[SETUP] WAIT %d...\n", t);
-    Serial.flush();
-    delay(1000);
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
   }
 
-  WiFi.mode(WIFI_STA);
-  WiFiMulti.addAP("FiWi-WLAN", "!Affenzirkus?");
+  Serial.println("");
+  Serial.println("WiFi connected");  
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  delay(5000);
+  
+
+  // Connect to the websocket server
+  if (client.connect(host, 81)) {
+    Serial.println("Connected");
+  } else {
+    Serial.println("Connection failed.");
+    while(1) {
+      // Hang on failure
+    }
+  }
+
+  // Handshake with the server
+  webSocketsClient.path = path;
+  webSocketsClient.host = host;
+  if (webSocketsClient.handshake(client)) {
+    Serial.println("Handshake successful");
+  } else {
+    Serial.println("Handshake failed.");
+    while(1) {
+      // Hang on failure
+    }  
+  }
 
 }
+
 
 void loop() {
-  
-  // wait for WiFi connection
-  if ((WiFiMulti.run() == WL_CONNECTED)) {
-    String pattern;
-    WiFiClient client;
+  String data;
+
+  if (client.connected()) {
     
-    if(digitalRead(D6) == LOW) {
-      //pattern = getActualPattern();
-        setButtonHit();
-      
-    };
-
+       // capture the value of analog 1, send it along
+    if (digitalRead(activate_Pin)) {
+    webSocketsClient.sendData(output);
+    }
+  } else {
+    Serial.println("Client disconnected.");
+    while (1) {
+      // Hang on disconnect.
+    }
   }
+  
+  // wait to fully let the client disconnect
+  delay(3000);
+  
 }
-String getActualPattern() {
-return "";
-}
-
-void setButtonHit() {
-  HTTPClient http;
-  StaticJsonDocument<96> doc;
-
-doc["command"]["setVars"]["isBuzzerHit"] = true;
-doc["ids"][0] = 13434724;
-String json;
-serializeJson(doc, json);
-      Serial.print("[HTTP] begin...\n");
-    if (http.begin("http://192.168.178.119:80/command")) {  // HTTP
-        http.addHeader("Content-Type","application/json");
-
-      Serial.print("[HTTP] POST...\n");
-      // start connection and send HTTP header
-//Serial.print(json);
-      int httpCode = http.POST(json);
-
-      // httpCode will be negative on error
-      if (httpCode > 0) {
-        // HTTP header has been send and Server response header has been handled
-        Serial.printf("[HTTP] POST... code: %d\n", httpCode);
-
-        // file found at server
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          String payload = http.getString();
-          Serial.println(payload);
-        }
-      } else {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-      }
-
-      http.end();
-    } else {
-      Serial.printf("[HTTP} Unable to connect\n");
-    }
-}
-
-void setOrangePattern() {
-  HTTPClient http;
-  StaticJsonDocument<96> doc;
-doc["command"]["programName"] = "prophet-orange";
-doc["ids"][0] = 14934563;
-String json;
-serializeJson(doc, json);
-      Serial.print("[HTTP] begin...\n");
-    if (http.begin("http://192.168.178.119:80/command")) {  // HTTP
-        http.addHeader("Content-Type","application/json");
-
-      Serial.print("[HTTP] POST...\n");
-      // start connection and send HTTP header
-//Serial.print(json);
-      int httpCode = http.POST(json);
-
-      // httpCode will be negative on error
-      if (httpCode > 0) {
-        // HTTP header has been send and Server response header has been handled
-        Serial.printf("[HTTP] POST... code: %d\n", httpCode);
-
-        // file found at server
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          String payload = http.getString();
-          Serial.println(payload);
-        }
-      } else {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-      }
-
-      http.end();
-    } else {
-      Serial.printf("[HTTP} Unable to connect\n");
-    }
-}
-
-void setBluePattern() {
