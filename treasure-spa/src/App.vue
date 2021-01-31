@@ -86,7 +86,8 @@ export default Vue.extend({
       getBuzzerJSON: { getVars: true },
       statusBuzzer: {},
       textField: 0,
-      jsonData: {}
+      jsonData: {},
+      ipAddressLED: "192.168.137.135"
     };
   },
   computed: {
@@ -99,7 +100,7 @@ export default Vue.extend({
   },
   created: function() {
     console.log("Starting WebSocket Connection.");
-    this.connection = new WebSocket("ws://192.168.137.62:81");
+    this.connection = new WebSocket("ws://" +  this.ipAddressLED + ":81");
 
     this.connection.onopen = function(event) {
       console.log(event);
